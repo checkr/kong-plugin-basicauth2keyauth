@@ -25,24 +25,24 @@ config.hide_credentials    -> whether to hide the original basic auth for upstre
 
 For example, with `config.sha256_enabled=false` it maps to a plain text.
 ```
-#config.key_name_in_header  = X-CHECKR-API
+#config.key_name_in_header  = X-CHECKR-APIKEY
 #config.sha256_enabled      = false
 
 curl -u api1234:
 # =>
 curl -u api1234:
-     -H 'X-CHECKR-API: api1234'
+     -H 'X-CHECKR-APIKEY: api1234'
 ```
 
 With `config.sha256_enabled=true` it maps to sha256(api_key)
 ```
-#config.key_name_in_header  = X-CHECKR-API
+#config.key_name_in_header  = X-CHECKR-APIKEY
 #config.sha256_enabled      = true
 
 curl -u api1234:
 # =>
 curl -u api1234:
-     -H 'X-CHECKR-API: 632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5
+     -H 'X-CHECKR-APIKEY: 632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5
 ```
 
 ## Development
