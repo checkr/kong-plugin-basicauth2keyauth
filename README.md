@@ -50,3 +50,10 @@ $ cd /kong
 $ bin/kong migrations up
 $ bin/kong start
 ```
+
+To test this plugin.
+
+```
+$ cd /kong
+$ bin/busted /kong-plugin/spec
+```
