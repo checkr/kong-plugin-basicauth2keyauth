@@ -37,7 +37,7 @@ curl -u api1234:
 With `config.sha256_enabled=true` it maps to sha256(api_key)
 ```
 #config.key_name_in_header  = X-CHECKR-API
-#config.sha256_enabled      = false
+#config.sha256_enabled      = true
 
 curl -u api1234:
 # =>
