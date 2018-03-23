@@ -21,6 +21,8 @@ config.sha256_enabled      -> whether to run sha256 on the basic auth username (
 config.hide_credentials    -> whether to hide the original basic auth for upstream services
 ```
 
+![](./docs/show.png)
+
 ## Development
 
 Follow https://github.com/Kong/kong-vagrant to setup kong-vagrant.
