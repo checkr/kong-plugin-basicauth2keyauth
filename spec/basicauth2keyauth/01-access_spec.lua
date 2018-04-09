@@ -75,5 +75,17 @@ describe("Plugin: key-auth (access)", function()
       local header_value = assert.request(res).has.header("apikey_from_basicauth")
       assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
+    it("generates nothing if basic auth has the password part", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/request",
+        headers = {
+          ["Host"] = "host2.com",
+          ["Authorization"] = "Basic YXBpMTIzNDpwYXNzd29yZAo=" -- "api1234:password"
+        }
+      })
+      assert.res_status(200, res)
+      assert.request(res).has.no.header("apikey_from_basicauth")
+    end)
   end)
 end)
