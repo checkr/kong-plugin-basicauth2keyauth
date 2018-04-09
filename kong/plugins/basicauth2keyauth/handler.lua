@@ -40,6 +40,12 @@ local function retrieve_credentials(request, header_name, conf)
         end
 
         username = basic_parts[1]
+        password = basic_parts[2]
+
+        if password ~= "" then
+          -- if password exists, we don't want to use that as api key
+          return
+        end
       end
     end
   end
