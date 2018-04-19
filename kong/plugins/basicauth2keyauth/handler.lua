@@ -1,5 +1,6 @@
 local resty_sha256 = require "resty.sha256"
 local to_hex = require "resty.string".to_hex
+local cjson = require "cjson"
 
 local plugin_name = ({...})[1]:match("^kong%.plugins%.([^%.]+)")
 local plugin = require("kong.plugins.base_plugin"):extend()
@@ -41,6 +42,14 @@ local function retrieve_credentials(request, header_name, conf)
 
         username = basic_parts[1]
         password = basic_parts[2]
+
+        ngx.log(ngx.INFO, cjson.encode({
+          debug_logging    = "basic_auth",
+          user_agent       = request.get_headers()["user_agent"],
+          cf_connecting_ip = request.get_headers()["cf-connecting-ip"],
+          username_length  = string.len(username),
+          password_length  = string.len(password)
+        }))
 
         if password ~= "" then
           -- if password exists, we don't want to use that as api key
