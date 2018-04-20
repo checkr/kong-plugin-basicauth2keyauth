@@ -100,5 +100,18 @@ describe("Plugin: key-auth (access)", function()
       local header_value = assert.request(res).has.header("apikey_from_basicauth")
       assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
+    it("generates new api_key header with sha256 value if basic is in upper case", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/request",
+        headers = {
+          ["Host"] = "host2.com",
+          ["Authorization"] = "BASIC YXBpMTIzNA==" -- "api1234"
+        }
+      })
+      assert.res_status(200, res)
+      local header_value = assert.request(res).has.header("apikey_from_basicauth")
+      assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
+    end)
   end)
 end)

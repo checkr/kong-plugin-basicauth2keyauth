@@ -13,7 +13,7 @@ local function retrieve_credentials(request, header_name, conf)
   local authorization_header = request.get_headers()[header_name]
 
   if authorization_header then
-    local iterator, iter_err = ngx.re.gmatch(authorization_header, "\\s*[Bb]asic\\s*(.+)")
+    local iterator, iter_err = ngx.re.gmatch(authorization_header, "\\s*Basic\\s*(.+)", "oji")
     if not iterator then
       ngx.log(ngx.ERR, iter_err)
       return
