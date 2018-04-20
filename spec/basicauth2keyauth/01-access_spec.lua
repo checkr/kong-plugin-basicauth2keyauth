@@ -55,25 +55,12 @@ describe("Plugin: key-auth (access)", function()
         path = "/request",
         headers = {
           ["Host"] = "host1.com",
-          ["Authorization"] = "Basic YXBpMTIzNDoK" -- "api1234:"
+          ["Authorization"] = "Basic YXBpMTIzNDo=" -- "api1234:"
         }
       })
       assert.res_status(200, res)
       local header_value = assert.request(res).has.header("apikey_from_basicauth")
       assert.equal("api1234", header_value)
-    end)
-    it("generates new api_key header with sha256 value if basic auth is in the headers", function()
-      local res = assert(client:send {
-        method = "GET",
-        path = "/request",
-        headers = {
-          ["Host"] = "host2.com",
-          ["Authorization"] = "Basic YXBpMTIzNDoK" -- "api1234:"
-        }
-      })
-      assert.res_status(200, res)
-      local header_value = assert.request(res).has.header("apikey_from_basicauth")
-      assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
     it("generates nothing if basic auth has the password part", function()
       local res = assert(client:send {
@@ -81,11 +68,37 @@ describe("Plugin: key-auth (access)", function()
         path = "/request",
         headers = {
           ["Host"] = "host2.com",
-          ["Authorization"] = "Basic YXBpMTIzNDpwYXNzd29yZAo=" -- "api1234:password"
+          ["Authorization"] = "Basic YXBpMTIzNDpwYXNzd29yZA==" -- "api1234:password"
         }
       })
       assert.res_status(200, res)
       assert.request(res).has.no.header("apikey_from_basicauth")
+    end)
+    it("generates new api_key header with sha256 value if basic auth is in the headers", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/request",
+        headers = {
+          ["Host"] = "host2.com",
+          ["Authorization"] = "Basic YXBpMTIzNDo=" -- "api1234:"
+        }
+      })
+      assert.res_status(200, res)
+      local header_value = assert.request(res).has.header("apikey_from_basicauth")
+      assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
+    end)
+    it("generates new api_key header with sha256 value if basic auth is in the headers without colon", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/request",
+        headers = {
+          ["Host"] = "host2.com",
+          ["Authorization"] = "Basic YXBpMTIzNA==" -- "api1234"
+        }
+      })
+      assert.res_status(200, res)
+      local header_value = assert.request(res).has.header("apikey_from_basicauth")
+      assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
   end)
 end)
