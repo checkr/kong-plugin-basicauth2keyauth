@@ -62,7 +62,7 @@ describe("Plugin: key-auth (access)", function()
       local header_value = assert.request(res).has.header("apikey_from_basicauth")
       assert.equal("api1234", header_value)
     end)
-    it("generates nothing if basic auth has the password part", function()
+    it("generates new api_key if basic auth has the password part", function()
       local res = assert(client:send {
         method = "GET",
         path = "/request",
@@ -72,7 +72,8 @@ describe("Plugin: key-auth (access)", function()
         }
       })
       assert.res_status(200, res)
-      assert.request(res).has.no.header("apikey_from_basicauth")
+      local header_value = assert.request(res).has.header("apikey_from_basicauth")
+      assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
     it("generates new api_key header with sha256 value if basic auth is in the headers", function()
       local res = assert(client:send {
@@ -113,7 +114,7 @@ describe("Plugin: key-auth (access)", function()
       local header_value = assert.request(res).has.header("apikey_from_basicauth")
       assert.equal("632d187cde1f395f3fb17e9783748d101b70174988a8e148bc7bc20f63453ea5", header_value)
     end)
-    it("generates new api_key header with sha256 value if password is just empty", function()
+    it("generates new api_key header with sha256 value if password is just a space", function()
       local res = assert(client:send {
         method = "GET",
         path = "/request",
