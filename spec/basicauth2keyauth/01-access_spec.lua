@@ -3,29 +3,73 @@ local helpers = require "spec.helpers"
 describe("Plugin: key-auth (access)", function()
   local client
   setup(function()
-    local api1 = assert(helpers.dao.apis:insert {
-      name         = "api-1",
-      hosts        = { "host1.com" },
-      upstream_url = helpers.mock_upstream_url,
-    })
-    assert(helpers.dao.plugins:insert {
-      name   = "basicauth2keyauth",
-      api_id = api1.id,
+
+    -- insert into table
+    _, db = helpers.get_db_utils(nil, {
+      "routes",
+      "services",
+      "plugins"
     })
 
-    local api2 = assert(helpers.dao.apis:insert {
-      name         = "api-2",
-      hosts        = { "host2.com" },
-      upstream_url = helpers.mock_upstream_url,
+    local service = bp.services:insert {
+      host     = helpers.mock_upstream_host,
+      port     = helpers.mock_upstream_port,
+      protocol = helpers.mock_upstream_protocol,
+    }
+
+    local route1 = assert(db.routes:insert {
+      hosts = { "host1.com" },
+      service   = service
     })
-    assert(helpers.dao.plugins:insert {
+
+    assert(db.plugins:insert {
+      name  = "basicauth2keyauth",
+      route = { id = route1.id }
+    })
+
+    local route2 = assert(db.routes:insert {
+      hosts = { "host2.com" },
+      service   = service
+    })
+
+    assert(db.plugins:insert {
       name   = "basicauth2keyauth",
-      api_id = api2.id,
+      route = { id = route2.id }
       config = {
         sha256_enabled = true,
       },
     })
+    -- API objects are deprecated from  v0.14.x onwards
+    -- Use combination of routes and services instead
+    -- 'hosts' from API object moved to Routes object
+    -- 'Services' are upstream concepts, behind API gateway
+    --
 
+    -- Set up API endpoints for, api1 and api2 (SHA256 enabled)
+    -- local api1 = assert(helpers.dao.apis:insert {
+    --   name         = "api-1",
+    --   hosts        = { "host1.com" },
+    --   upstream_url = helpers.mock_upstream_url,
+    -- })
+    -- assert(helpers.dao.plugins:insert {
+    --   name   = "basicauth2keyauth",
+    --   api_id = api1.id,
+    -- })
+
+    -- local api2 = assert(helpers.dao.apis:insert {
+    --   name         = "api-2",
+    --   hosts        = { "host2.com" },
+    --   upstream_url = helpers.mock_upstream_url,
+    -- })
+    -- assert(helpers.dao.plugins:insert {
+    --   name   = "basicauth2keyauth",
+    --   api_id = api2.id,
+    --   config = {
+    --     sha256_enabled = true,
+    --   },
+    -- })
+
+    -- Start kong w/ nginx configuration and custom plugin enabled
     assert(helpers.start_kong({
       nginx_conf = "spec/fixtures/custom_nginx.template",
       custom_plugins = "basicauth2keyauth",
@@ -39,6 +83,7 @@ describe("Plugin: key-auth (access)", function()
   end)
 
   describe("plugin: basicauth2keyauth", function()
+    -- Make a GET request to host1.com (api1) w/o basic auth in header
     it("does nothing if there's no basic auth in the headers", function()
       local res = assert(client:send {
         method = "GET",
@@ -49,6 +94,7 @@ describe("Plugin: key-auth (access)", function()
       })
       assert.res_status(200, res)
     end)
+    -- Make a GET request to host1.com (api1) w/ basic auth in header
     it("generates new api_key header if basic auth is in the headers", function()
       local res = assert(client:send {
         method = "GET",
